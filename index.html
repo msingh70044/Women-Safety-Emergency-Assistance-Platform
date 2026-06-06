@@ -1,0 +1,1734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SafeHer — Women Emergency Assistance Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+<style>
+  :root {
+    --bg: #0a0a14;
+    --surface: #13132a;
+    --surface2: #1a1a35;
+    --border: rgba(255,255,255,0.07);
+    --accent: #ff3c6e;
+    --accent2: #a855f7;
+    --accent3: #06b6d4;
+    --text: #f0eeff;
+    --muted: #8b86a8;
+    --success: #10d48e;
+    --warning: #f59e0b;
+    --danger: #ff3c6e;
+    --glow: 0 0 30px rgba(255,60,110,0.25);
+    --radius: 14px;
+    --radius-sm: 8px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  h1,h2,h3,h4,h5 { font-family: 'Syne', sans-serif; }
+
+  /* ─── SCROLLBAR ─── */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--accent2); border-radius: 99px; }
+
+  /* ─── BACKGROUNDS ─── */
+  .noise-bg::before {
+    content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+    background: radial-gradient(ellipse 80% 60% at 20% 10%, rgba(168,85,247,0.12) 0%, transparent 70%),
+                radial-gradient(ellipse 60% 40% at 80% 80%, rgba(255,60,110,0.10) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 50% at 50% 50%, rgba(6,182,212,0.05) 0%, transparent 70%);
+  }
+
+  /* ─── LAYOUT ─── */
+  #app { position:relative; z-index:1; }
+  .screen { display:none; }
+  .screen.active { display:block; }
+
+  /* ─── CARDS ─── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    transition: box-shadow .2s;
+  }
+  .card:hover { box-shadow: 0 4px 24px rgba(168,85,247,0.1); }
+  .glass {
+    background: rgba(19,19,42,0.7);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+
+  /* ─── BUTTONS ─── */
+  .btn {
+    display:inline-flex; align-items:center; justify-content:center; gap:.5rem;
+    padding:.65rem 1.4rem; border-radius: var(--radius-sm); border:none; cursor:pointer;
+    font-family:'DM Sans',sans-serif; font-weight:600; font-size:.875rem;
+    transition: all .2s; white-space:nowrap;
+  }
+  .btn:active { transform:scale(.96); }
+  .btn-danger {
+    background: linear-gradient(135deg, #ff3c6e, #e11d48);
+    color:#fff; box-shadow: 0 4px 20px rgba(255,60,110,0.35);
+  }
+  .btn-danger:hover { box-shadow: 0 6px 28px rgba(255,60,110,0.5); filter:brightness(1.1); }
+  .btn-primary {
+    background: linear-gradient(135deg, #a855f7, #7c3aed);
+    color:#fff; box-shadow: 0 4px 18px rgba(168,85,247,0.3);
+  }
+  .btn-primary:hover { filter:brightness(1.1); box-shadow: 0 6px 24px rgba(168,85,247,0.4); }
+  .btn-outline {
+    background:transparent; border:1.5px solid rgba(168,85,247,0.4);
+    color: var(--accent2);
+  }
+  .btn-outline:hover { background: rgba(168,85,247,0.1); }
+  .btn-ghost {
+    background:transparent; color:var(--muted); border:none;
+  }
+  .btn-ghost:hover { color:var(--text); background:rgba(255,255,255,0.05); }
+  .btn-success {
+    background: linear-gradient(135deg,#10d48e,#059669);
+    color:#fff; box-shadow:0 4px 18px rgba(16,212,142,0.25);
+  }
+  .btn-sm { padding:.45rem .9rem; font-size:.8rem; }
+  .btn-lg { padding:.85rem 2rem; font-size:1rem; }
+  .btn-block { width:100%; }
+  .btn:disabled { opacity:.45; cursor:not-allowed; }
+
+  /* ─── FORM INPUTS ─── */
+  .field { display:flex; flex-direction:column; gap:.5rem; }
+  .field label { font-size:.82rem; font-weight:600; color:var(--muted); letter-spacing:.04em; text-transform:uppercase; }
+  .field input, .field select, .field textarea {
+    background: var(--surface2); border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm); color:var(--text); font-family:'DM Sans',sans-serif;
+    font-size:.9rem; padding:.7rem 1rem; outline:none; transition:.2s;
+    width:100%;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus {
+    border-color: var(--accent2); box-shadow: 0 0 0 3px rgba(168,85,247,0.12);
+  }
+  .field select option { background: var(--surface2); }
+  .field textarea { resize:vertical; min-height:80px; }
+
+  /* ─── BADGES ─── */
+  .badge {
+    display:inline-flex; align-items:center; gap:.35rem;
+    padding:.25rem .75rem; border-radius:99px; font-size:.72rem; font-weight:700;
+  }
+  .badge-green { background:rgba(16,212,142,0.12); color:var(--success); }
+  .badge-red { background:rgba(255,60,110,0.12); color:var(--danger); }
+  .badge-amber { background:rgba(245,158,11,0.12); color:var(--warning); }
+  .badge-purple { background:rgba(168,85,247,0.12); color:var(--accent2); }
+  .badge-cyan { background:rgba(6,182,212,0.12); color:var(--accent3); }
+
+  /* ─── LOGIN SCREEN ─── */
+  #screen-login {
+    min-height:100vh; display:flex; align-items:center; justify-content:center;
+    padding:2rem 1rem;
+  }
+  .login-wrap { width:100%; max-width:440px; }
+  .login-logo {
+    text-align:center; margin-bottom:2rem;
+  }
+  .login-logo .logo-icon {
+    width:72px; height:72px; border-radius:20px; margin:0 auto 1rem;
+    background: linear-gradient(135deg,#ff3c6e,#a855f7);
+    display:flex; align-items:center; justify-content:center;
+    font-size:2rem; box-shadow: 0 8px 32px rgba(255,60,110,0.35);
+    animation: pulse-logo 2.5s ease-in-out infinite;
+  }
+  @keyframes pulse-logo {
+    0%,100%{box-shadow:0 8px 32px rgba(255,60,110,0.35);}
+    50%{box-shadow:0 12px 48px rgba(255,60,110,0.55);}
+  }
+  .login-logo h1 { font-size:2.2rem; font-weight:800; background:linear-gradient(90deg,#ff3c6e,#a855f7); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  .login-logo p { color:var(--muted); font-size:.88rem; margin-top:.25rem; }
+  .tab-switch {
+    display:flex; background:var(--surface2); border-radius:10px; padding:4px;
+    margin-bottom:1.5rem;
+  }
+  .tab-switch button {
+    flex:1; padding:.55rem; border-radius:7px; border:none; background:transparent;
+    color:var(--muted); font-family:'DM Sans',sans-serif; font-weight:600; font-size:.88rem;
+    cursor:pointer; transition:.2s;
+  }
+  .tab-switch button.active {
+    background: linear-gradient(135deg,#a855f7,#7c3aed); color:#fff;
+    box-shadow:0 2px 10px rgba(168,85,247,0.3);
+  }
+
+  /* ─── SIDEBAR ─── */
+  #sidebar {
+    position:fixed; top:0; left:0; width:260px; height:100vh;
+    background: var(--surface); border-right:1px solid var(--border);
+    z-index:100; display:flex; flex-direction:column;
+    transform:translateX(-100%); transition:transform .3s;
+  }
+  #sidebar.open { transform:translateX(0); }
+  @media(min-width:1024px){
+    #sidebar { transform:translateX(0); }
+    #main-content { margin-left:260px; }
+  }
+  .sidebar-overlay {
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55);
+    backdrop-filter:blur(2px); z-index:99;
+  }
+  .sidebar-overlay.visible { display:block; }
+  .sidebar-logo {
+    padding:1.25rem 1.25rem 1rem;
+    border-bottom:1px solid var(--border);
+    display:flex; align-items:center; gap:.75rem;
+  }
+  .sidebar-logo .s-icon {
+    width:38px; height:38px; border-radius:10px;
+    background:linear-gradient(135deg,#ff3c6e,#a855f7);
+    display:flex; align-items:center; justify-content:center; font-size:1rem;
+    flex-shrink:0; box-shadow:0 4px 14px rgba(255,60,110,0.3);
+  }
+  .sidebar-logo h2 { font-size:1.2rem; font-weight:800; }
+  .sidebar-logo p { font-size:.7rem; color:var(--muted); }
+  .sidebar-close { margin-left:auto; background:none; border:none; color:var(--muted); cursor:pointer; display:none; }
+  @media(max-width:1023px){ .sidebar-close { display:flex; } }
+  nav.sidebar-nav { flex:1; overflow-y:auto; padding:.75rem; }
+  .nav-item {
+    display:flex; align-items:center; gap:.75rem;
+    padding:.7rem .85rem; border-radius:10px; margin-bottom:2px;
+    cursor:pointer; transition:.18s; color:var(--muted);
+    font-weight:500; font-size:.88rem; border:none; background:transparent; width:100%; text-align:left;
+  }
+  .nav-item:hover { background:rgba(255,255,255,0.04); color:var(--text); }
+  .nav-item.active {
+    background: linear-gradient(90deg,rgba(168,85,247,0.18),rgba(168,85,247,0.06));
+    color:var(--accent2); border-left:3px solid var(--accent2);
+  }
+  .nav-item i { width:16px; text-align:center; }
+  .nav-item .nav-label { flex:1; }
+  .sidebar-sos {
+    margin:.75rem; border-radius:12px;
+    background:linear-gradient(135deg,rgba(255,60,110,0.15),rgba(168,85,247,0.1));
+    border:1px solid rgba(255,60,110,0.2); padding:1rem;
+  }
+  .sidebar-sos h4 { font-size:.8rem; font-weight:700; color:#ff3c6e; margin-bottom:.3rem; }
+  .sidebar-sos p { font-size:.72rem; color:var(--muted); margin-bottom:.75rem; }
+  .sidebar-user {
+    padding:.75rem 1rem; border-top:1px solid var(--border);
+    display:flex; align-items:center; gap:.75rem;
+  }
+  .avatar {
+    width:36px; height:36px; border-radius:50%; font-weight:700; font-size:.82rem;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+    background:linear-gradient(135deg,#a855f7,#7c3aed); color:#fff;
+  }
+  .sidebar-user-info { flex:1; min-width:0; }
+  .sidebar-user-info p { font-weight:600; font-size:.85rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .sidebar-user-info span { font-size:.72rem; color:var(--muted); }
+
+  /* ─── TOPBAR ─── */
+  #topbar {
+    position:sticky; top:0; z-index:50;
+    background:rgba(10,10,20,0.8); backdrop-filter:blur(20px);
+    border-bottom:1px solid var(--border);
+    display:flex; align-items:center; gap:.75rem; padding:.75rem 1.25rem;
+  }
+  #topbar h2 { font-size:1.05rem; font-weight:700; }
+  #topbar p { font-size:.75rem; color:var(--muted); }
+  .topbar-right { margin-left:auto; display:flex; align-items:center; gap:.5rem; }
+  .icon-btn {
+    width:36px; height:36px; border-radius:9px; border:1px solid var(--border);
+    background:var(--surface); display:flex; align-items:center; justify-content:center;
+    cursor:pointer; color:var(--muted); font-size:.9rem; transition:.15s;
+    position:relative;
+  }
+  .icon-btn:hover { color:var(--text); border-color:var(--accent2); }
+  .notif-dot {
+    position:absolute; top:4px; right:4px; width:8px; height:8px;
+    border-radius:50%; background:var(--accent); border:2px solid var(--surface);
+  }
+  .hamburger { display:flex; }
+  @media(min-width:1024px){ .hamburger { display:none; } }
+
+  /* ─── MAIN CONTENT ─── */
+  #main-content { min-height:100vh; }
+  .page { display:none; padding:1.5rem 1.25rem; max-width:1100px; }
+  .page.active { display:block; }
+  @media(min-width:640px){ .page { padding:1.75rem 1.75rem; } }
+
+  /* ─── GRIDS ─── */
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+  .grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; }
+  .grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; }
+  @media(max-width:900px){ .grid-4 { grid-template-columns:repeat(2,1fr); } .grid-3 { grid-template-columns:repeat(2,1fr); } }
+  @media(max-width:640px){ .grid-4,.grid-3,.grid-2 { grid-template-columns:1fr; } }
+  .gap-1 { gap:.5rem; } .gap-2 { gap:1rem; } .gap-3 { gap:1.5rem; }
+  .flex { display:flex; } .items-center { align-items:center; } .flex-1 { flex:1; }
+  .justify-between { justify-content:space-between; } .flex-wrap { flex-wrap:wrap; }
+  .space-y > * + * { margin-top:1rem; }
+  .space-y-sm > * + * { margin-top:.65rem; }
+  .mt-1 { margin-top:.5rem; } .mt-2 { margin-top:1rem; } .mt-3 { margin-top:1.5rem; }
+  .mb-1 { margin-bottom:.5rem; } .mb-2 { margin-bottom:1rem; } .mb-3 { margin-bottom:1.5rem; }
+
+  /* ─── STAT CARDS ─── */
+  .stat-card {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:var(--radius); padding:1.1rem;
+    display:flex; align-items:center; gap:1rem;
+    transition:.2s;
+  }
+  .stat-card:hover { border-color:rgba(168,85,247,0.3); }
+  .stat-icon {
+    width:44px; height:44px; border-radius:12px;
+    display:flex; align-items:center; justify-content:center; font-size:1.1rem;
+    flex-shrink:0;
+  }
+  .stat-val { font-size:1.5rem; font-weight:800; font-family:'Syne',sans-serif; }
+  .stat-lbl { font-size:.72rem; color:var(--muted); margin-top:.1rem; }
+  .stat-sub { font-size:.7rem; color:var(--muted); }
+
+  /* ─── SOS BUTTON ─── */
+  .sos-big-btn {
+    width:160px; height:160px; border-radius:50%; border:none; cursor:pointer;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.5rem;
+    font-family:'Syne',sans-serif; font-size:1.5rem; font-weight:800; color:#fff;
+    background: radial-gradient(circle, #ff3c6e 0%, #c9155a 100%);
+    box-shadow: 0 0 0 12px rgba(255,60,110,0.15), 0 0 0 24px rgba(255,60,110,0.07), 0 8px 40px rgba(255,60,110,0.5);
+    transition:.2s; position:relative; overflow:hidden;
+  }
+  .sos-big-btn::before {
+    content:''; position:absolute; inset:-50%;
+    background: conic-gradient(transparent 0deg, rgba(255,255,255,0.08) 60deg, transparent 120deg);
+    animation: sos-spin 3s linear infinite;
+  }
+  @keyframes sos-spin { to { transform:rotate(360deg); } }
+  .sos-big-btn:active { transform:scale(.95); }
+  .sos-big-btn.inactive { background:radial-gradient(circle,#ff3c6e 0%,#c9155a 100%); }
+  .sos-big-btn.active-sos {
+    background:radial-gradient(circle,#ff6b9d 0%,#ff3c6e 100%);
+    animation:sos-pulse 1.2s ease-in-out infinite;
+  }
+  @keyframes sos-pulse {
+    0%,100%{ box-shadow: 0 0 0 12px rgba(255,60,110,0.2), 0 0 0 24px rgba(255,60,110,0.1), 0 8px 40px rgba(255,60,110,0.6); }
+    50%{ box-shadow: 0 0 0 20px rgba(255,60,110,0.15), 0 0 0 40px rgba(255,60,110,0.06), 0 12px 60px rgba(255,60,110,0.7); }
+  }
+
+  /* ─── MAP EMBED ─── */
+  .map-container {
+    width:100%; height:220px; border-radius:12px; overflow:hidden; position:relative;
+    background:var(--surface2); border:1px solid var(--border);
+  }
+  .map-container iframe { width:100%; height:100%; border:none; }
+  .map-live-dot {
+    position:absolute; top:.5rem; right:.5rem;
+    display:flex; align-items:center; gap:.4rem;
+    background:rgba(10,10,20,0.75); border-radius:99px; padding:.3rem .6rem;
+    font-size:.72rem; font-weight:600;
+  }
+  .live-dot { width:8px; height:8px; border-radius:50%; background:var(--success); animation:blink 1.3s ease-in-out infinite; }
+  @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:.3;} }
+
+  /* ─── VOICE RECORDER ─── */
+  .recorder-wrap {
+    background:var(--surface2); border-radius:12px; border:1px solid var(--border); padding:1rem;
+  }
+  .recorder-controls { display:flex; align-items:center; gap:.75rem; flex-wrap:wrap; }
+  .rec-btn {
+    width:44px; height:44px; border-radius:50%; border:none; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; font-size:1rem;
+    transition:.2s;
+  }
+  .rec-btn.rec-start { background:var(--accent); color:#fff; }
+  .rec-btn.rec-stop { background:var(--surface); color:var(--accent); border:2px solid var(--accent); }
+  .rec-btn.recording { background:var(--accent); color:#fff; animation:blink 1s ease-in-out infinite; }
+  .waveform {
+    flex:1; height:36px; background:var(--surface); border-radius:8px;
+    display:flex; align-items:center; justify-content:center; gap:2px; overflow:hidden;
+  }
+  .wave-bar {
+    width:3px; border-radius:99px; background:var(--accent2);
+    transition: height .1s;
+  }
+  #rec-status { font-size:.78rem; color:var(--muted); }
+  audio#playback { width:100%; margin-top:.5rem; border-radius:8px; outline:none; }
+  audio::-webkit-media-controls-panel { background:var(--surface2); }
+
+  /* ─── VOLUNTEER CARD ─── */
+  .vol-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:1rem; }
+  .vol-card .top { display:flex; align-items:center; gap:.75rem; }
+
+  /* ─── ALERT CARD ─── */
+  .alert-card {
+    background:var(--surface); border:1px solid rgba(255,60,110,0.18); border-radius:var(--radius);
+    padding:1rem; position:relative; overflow:hidden;
+  }
+  .alert-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,#ff3c6e,#a855f7); }
+
+  /* ─── SAFE ZONE CARD ─── */
+  .zone-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:1rem; }
+  .zone-icon { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1rem; flex-shrink:0; }
+
+  /* ─── CONTACT CARD ─── */
+  .contact-item {
+    background:var(--surface); border:1px solid var(--border); border-radius:10px;
+    padding:.8rem 1rem; display:flex; align-items:center; gap:.75rem;
+  }
+
+  /* ─── NOTIFICATION DRAWER ─── */
+  #notif-drawer {
+    position:absolute; top:calc(100% + .5rem); right:0; width:340px;
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+    box-shadow:0 12px 40px rgba(0,0,0,0.5); z-index:200; display:none; overflow:hidden;
+  }
+  #notif-drawer.open { display:block; }
+  .notif-header { padding:.85rem 1rem; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+  .notif-item { padding:.75rem 1rem; border-bottom:1px solid rgba(255,255,255,0.04); display:flex; gap:.75rem; align-items:flex-start; cursor:pointer; transition:.15s; }
+  .notif-item:hover { background:rgba(255,255,255,0.03); }
+  .notif-item.unread { background:rgba(168,85,247,0.04); }
+  .notif-icon { width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:.8rem; flex-shrink:0; }
+
+  /* ─── PROFILE DRAWER ─── */
+  #profile-drawer {
+    position:absolute; top:calc(100% + .5rem); right:0; width:240px;
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+    box-shadow:0 12px 40px rgba(0,0,0,0.5); z-index:200; display:none; overflow:hidden;
+  }
+  #profile-drawer.open { display:block; }
+  .profile-head { padding:1rem; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:.75rem; }
+  .profile-menu a {
+    display:flex; align-items:center; gap:.65rem; padding:.65rem 1rem;
+    font-size:.85rem; color:var(--muted); text-decoration:none; cursor:pointer; transition:.15s;
+  }
+  .profile-menu a:hover { color:var(--text); background:rgba(255,255,255,0.03); }
+  .profile-menu a.danger { color:var(--accent); }
+
+  /* ─── TOAST ─── */
+  #toast {
+    position:fixed; bottom:1.5rem; left:50%; transform:translateX(-50%) translateY(80px);
+    background:var(--surface); border:1px solid rgba(16,212,142,0.3);
+    border-radius:99px; padding:.65rem 1.25rem;
+    display:flex; align-items:center; gap:.6rem; font-size:.85rem; font-weight:500;
+    box-shadow:0 8px 32px rgba(0,0,0,0.4); z-index:9999;
+    transition: transform .35s cubic-bezier(.34,1.56,.64,1), opacity .25s;
+    opacity:0; pointer-events:none; white-space:nowrap;
+  }
+  #toast.show { transform:translateX(-50%) translateY(0); opacity:1; pointer-events:auto; }
+  #toast i { color:var(--success); }
+
+  /* ─── FLOATING SOS FAB ─── */
+  #sos-fab {
+    position:fixed; bottom:1.5rem; right:1.5rem; z-index:500;
+    width:52px; height:52px; border-radius:50%; background:var(--accent);
+    border:none; cursor:pointer; color:#fff; font-size:1.1rem;
+    box-shadow:0 4px 20px rgba(255,60,110,0.45); display:none; align-items:center; justify-content:center;
+    animation:sos-pulse 1.2s ease-in-out infinite;
+  }
+
+  /* ─── ADMIN CHART BAR ─── */
+  .bar-row { display:flex; align-items:center; gap:.75rem; margin-bottom:.6rem; }
+  .bar-label { width:52px; font-size:.72rem; color:var(--muted); text-align:right; }
+  .bar-track { flex:1; height:10px; border-radius:99px; background:var(--surface2); overflow:hidden; }
+  .bar-fill { height:100%; border-radius:99px; }
+  .bar-count { font-size:.72rem; color:var(--muted); width:28px; }
+
+  /* ─── DONUT CHART ─── */
+  .donut-wrap { display:flex; align-items:center; justify-content:center; padding:.5rem 0; }
+
+  /* ─── PROGRESS BAR ─── */
+  .progress { height:8px; border-radius:99px; background:var(--surface2); overflow:hidden; }
+  .progress-fill { height:100%; border-radius:99px; }
+
+  /* ─── SECTION HEADER ─── */
+  .section-hdr { display:flex; align-items:center; gap:.75rem; margin-bottom:1rem; }
+  .section-hdr-icon {
+    width:32px; height:32px; border-radius:8px;
+    background:rgba(168,85,247,0.12); color:var(--accent2);
+    display:flex; align-items:center; justify-content:center; font-size:.85rem;
+  }
+  .section-hdr h3 { font-size:1rem; font-weight:700; }
+  .section-hdr p { font-size:.72rem; color:var(--muted); }
+
+  /* ─── DIVIDER ─── */
+  hr { border:none; border-top:1px solid var(--border); margin:1.25rem 0; }
+
+  /* ─── SOS ACTIVE SCREEN ─── */
+  .sos-screen-inner { text-align:center; padding:2rem 1rem; }
+  .sos-status-badge {
+    display:inline-flex; align-items:center; gap:.5rem;
+    background:rgba(255,60,110,0.12); border:1px solid rgba(255,60,110,0.25);
+    border-radius:99px; padding:.4rem 1rem; font-weight:700; font-size:.82rem; color:var(--accent);
+    margin-bottom:1.25rem; animation:blink 1.3s ease-in-out infinite;
+  }
+
+  /* ─── FOOTER ─── */
+  footer {
+    text-align:center; padding:1.5rem 1rem 1.25rem;
+    border-top:1px solid var(--border); color:var(--muted); font-size:.78rem; margin-top:2rem;
+  }
+  footer strong { color:var(--accent2); }
+
+  /* ─── ANIMATIONS ─── */
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(16px); }
+    to { opacity:1; transform:translateY(0); }
+  }
+  .fade-in { animation: fadeUp .35s ease forwards; }
+  .page.active > * { animation: fadeUp .3s ease forwards; }
+
+  /* ─── RESPONSIVE FIXES ─── */
+  @media(max-width:640px){
+    .sos-big-btn { width:130px; height:130px; font-size:1.25rem; }
+    #notif-drawer { width: min(340px, calc(100vw - 2rem)); right:-1rem; }
+    #profile-drawer { width:min(240px, calc(100vw - 2rem)); right:-1rem; }
+  }
+</style>
+</head>
+<body class="noise-bg">
+<div id="app">
+
+<!-- ══════════════════════════════════════════════════════════ LOGIN SCREEN -->
+<div id="screen-login" class="screen active">
+  <div class="login-wrap">
+    <div class="login-logo">
+      <div class="logo-icon">🛡️</div>
+      <h1>SafeHer</h1>
+      <p>Women Emergency Assistance Platform</p>
+    </div>
+    <div class="card">
+      <div class="tab-switch mb-2">
+        <button id="tab-login" class="active" onclick="switchTab('login')">Sign In</button>
+        <button id="tab-register" onclick="switchTab('register')">Register</button>
+      </div>
+
+      <!-- LOGIN FORM -->
+      <div id="form-login" class="space-y">
+        <div class="field"><label>Email</label><input type="email" id="l-email" placeholder="you@example.com" /></div>
+        <div class="field"><label>Password</label><input type="password" id="l-pass" placeholder="••••••" /></div>
+        <div class="field">
+          <label>Login As</label>
+          <select id="l-role">
+            <option value="user">Woman Seeking Safety</option>
+            <option value="volunteer">Volunteer / Responder</option>
+            <option value="admin">Administrator</option>
+          </select>
+        </div>
+        <button class="btn btn-primary btn-block btn-lg" onclick="doLogin()">Sign In</button>
+        <p style="text-align:center;font-size:.78rem;color:var(--muted)">Demo: fill any email/password to sign in</p>
+      </div>
+
+      <!-- REGISTER FORM -->
+      <div id="form-register" style="display:none" class="space-y">
+        <div class="field"><label>Full Name</label><input type="text" id="r-name" placeholder="Your full name" /></div>
+        <div class="field"><label>Email</label><input type="email" id="r-email" placeholder="you@example.com" /></div>
+        <div class="field"><label>Phone</label><input type="tel" id="r-phone" placeholder="+91 98765 43210" /></div>
+        <div class="field"><label>Password</label><input type="password" id="r-pass" placeholder="••••••" /></div>
+        <div class="field">
+          <label>I am a</label>
+          <select id="r-role">
+            <option value="user">Woman Seeking Safety</option>
+            <option value="volunteer">Volunteer / Responder</option>
+            <option value="admin">Administrator</option>
+          </select>
+        </div>
+        <button class="btn btn-primary btn-block btn-lg" onclick="doRegister()">Create Account</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ APP SHELL -->
+<div id="screen-app" class="screen" style="display:none">
+
+  <!-- SIDEBAR OVERLAY -->
+  <div class="sidebar-overlay" id="sb-overlay" onclick="closeSidebar()"></div>
+
+  <!-- SIDEBAR -->
+  <aside id="sidebar">
+    <div class="sidebar-logo">
+      <div class="s-icon">🛡️</div>
+      <div>
+        <h2>SafeHer</h2>
+        <p>Safety Platform</p>
+      </div>
+      <button class="sidebar-close icon-btn" onclick="closeSidebar()"><i class="fas fa-times"></i></button>
+    </div>
+    <nav class="sidebar-nav" id="sidebar-nav"><!-- populated by JS --></nav>
+    <div class="sidebar-sos">
+      <h4>⚡ Emergency SOS</h4>
+      <p>One-tap live location alert to volunteers & contacts</p>
+      <button class="btn btn-danger btn-sm btn-block" onclick="goPage('sos')"><i class="fas fa-exclamation-triangle"></i> SOS Alert</button>
+    </div>
+    <div class="sidebar-user">
+      <div class="avatar" id="sb-avatar">JD</div>
+      <div class="sidebar-user-info">
+        <p id="sb-name">Jane Doe</p>
+        <span id="sb-role-lbl">User</span>
+      </div>
+      <button class="icon-btn" onclick="doLogout()" title="Logout"><i class="fas fa-sign-out-alt"></i></button>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <div id="main-content">
+    <!-- TOPBAR -->
+    <div id="topbar">
+      <button class="icon-btn hamburger" onclick="openSidebar()"><i class="fas fa-bars"></i></button>
+      <div>
+        <h2 id="page-title">Dashboard</h2>
+        <p id="page-subtitle">Welcome back</p>
+      </div>
+      <div class="topbar-right">
+        <!-- SOS Active Indicator -->
+        <span id="sos-indicator" style="display:none" class="badge badge-red">
+          <span class="live-dot" style="background:var(--accent)"></span> SOS Active
+        </span>
+        <!-- Notifications -->
+        <div style="position:relative">
+          <button class="icon-btn" id="notif-btn" onclick="toggleNotif()">
+            <i class="fas fa-bell"></i>
+            <span class="notif-dot" id="notif-dot"></span>
+          </button>
+          <div id="notif-drawer">
+            <div class="notif-header">
+              <span style="font-weight:700;font-size:.9rem">Notifications</span>
+              <button class="btn btn-ghost btn-sm" onclick="markAllRead()">Mark all read</button>
+            </div>
+            <div id="notif-list"></div>
+          </div>
+        </div>
+        <!-- Profile -->
+        <div style="position:relative">
+          <button class="avatar" id="profile-btn" onclick="toggleProfile()" style="cursor:pointer" title="Profile">JD</button>
+          <div id="profile-drawer">
+            <div class="profile-head">
+              <div class="avatar">JD</div>
+              <div>
+                <p style="font-weight:700;font-size:.88rem" id="pd-name">Jane Doe</p>
+                <span style="font-size:.72rem;color:var(--muted)" id="pd-role">User</span>
+              </div>
+            </div>
+            <div class="profile-menu">
+              <a><i class="fas fa-user-circle"></i> My Profile</a>
+              <a><i class="fas fa-cog"></i> Settings</a>
+              <a onclick="goPage('contacts');toggleProfile()"><i class="fas fa-phone"></i> Emergency Contacts</a>
+              <a><i class="fas fa-question-circle"></i> Help & Support</a>
+              <a class="danger" onclick="doLogout()"><i class="fas fa-sign-out-alt"></i> Sign Out</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── PAGES ─── -->
+
+    <!-- DASHBOARD (user) -->
+    <div class="page" id="page-dashboard">
+      <!-- SOS Banner -->
+      <div class="card mb-3" style="background:linear-gradient(135deg,rgba(255,60,110,0.08),rgba(168,85,247,0.08));border-color:rgba(255,60,110,0.18)">
+        <div class="flex items-center gap-2 flex-wrap" style="justify-content:space-between">
+          <div>
+            <h3 style="font-size:1.1rem;margin-bottom:.3rem">🚨 Emergency SOS</h3>
+            <p style="font-size:.83rem;color:var(--muted)">Instantly alert nearby volunteers & trusted contacts with live location.</p>
+          </div>
+          <button class="btn btn-danger" onclick="goPage('sos')" style="white-space:nowrap"><i class="fas fa-exclamation-triangle"></i> Trigger SOS</button>
+        </div>
+      </div>
+      <!-- Stats -->
+      <div class="grid-4 mb-3">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:linear-gradient(135deg,rgba(16,212,142,0.18),rgba(5,150,105,0.1));color:var(--success)"><i class="fas fa-shield-alt"></i></div>
+          <div><div class="stat-val">92%</div><div class="stat-lbl">Safety Score</div><div class="stat-sub">Excellent</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:linear-gradient(135deg,rgba(6,182,212,0.18),rgba(6,182,212,0.1));color:var(--accent3)"><i class="fas fa-users"></i></div>
+          <div><div class="stat-val" id="contacts-count">3</div><div class="stat-lbl">Contacts</div><div class="stat-sub">Trusted people</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:linear-gradient(135deg,rgba(168,85,247,0.18),rgba(168,85,247,0.1));color:var(--accent2)"><i class="fas fa-map-marker-alt"></i></div>
+          <div><div class="stat-val">4</div><div class="stat-lbl">Nearby Help</div><div class="stat-sub">Volunteers available</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:linear-gradient(135deg,rgba(245,158,11,0.18),rgba(245,158,11,0.1));color:var(--warning)"><i class="fas fa-exclamation-circle"></i></div>
+          <div><div class="stat-val">3</div><div class="stat-lbl">Active Alerts</div><div class="stat-sub">In your area</div></div>
+        </div>
+      </div>
+      <!-- Location + Actions -->
+      <div class="grid-2 mb-3">
+        <div class="card">
+          <div class="section-hdr">
+            <div class="section-hdr-icon"><i class="fas fa-map-marker-alt"></i></div>
+            <div><h3>Live Location</h3><p>Real-time GPS tracking</p></div>
+          </div>
+          <div style="background:var(--surface2);border-radius:10px;padding:.65rem .85rem;display:flex;align-items:center;gap:.6rem;margin-bottom:.75rem">
+            <i class="fas fa-location-arrow" style="color:var(--accent2)"></i>
+            <span id="loc-display" style="font-size:.85rem;font-weight:500">Getting location…</span>
+            <span class="badge badge-green ml-auto"><span class="live-dot"></span>Live</span>
+          </div>
+          <div class="map-container">
+            <iframe id="map-iframe" src="about:blank" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+            <div class="map-live-dot"><span class="live-dot"></span><span style="color:var(--success)">Live GPS</span></div>
+          </div>
+          <button class="btn btn-outline btn-sm btn-block mt-2" onclick="shareLocation()"><i class="fas fa-share-alt"></i> Share Location</button>
+        </div>
+        <div class="card">
+          <div class="section-hdr">
+            <div class="section-hdr-icon"><i class="fas fa-bolt"></i></div>
+            <div><h3>Quick Actions</h3><p>Stay prepared</p></div>
+          </div>
+          <div class="grid-2 gap-1">
+            <button class="btn btn-outline btn-sm" style="flex-direction:column;padding:.85rem .5rem;height:auto" onclick="window.open('tel:100')"><i class="fas fa-phone" style="font-size:1.2rem;margin-bottom:.25rem"></i><span style="font-size:.72rem">Call Police</span></button>
+            <button class="btn btn-outline btn-sm" style="flex-direction:column;padding:.85rem .5rem;height:auto" onclick="shareLocation()"><i class="fas fa-heart" style="font-size:1.2rem;margin-bottom:.25rem;color:var(--accent)"></i><span style="font-size:.72rem">Share Location</span></button>
+            <button class="btn btn-outline btn-sm" style="flex-direction:column;padding:.85rem .5rem;height:auto" onclick="showToast('Alerts muted for 30 minutes')"><i class="fas fa-volume-mute" style="font-size:1.2rem;margin-bottom:.25rem;color:var(--warning)"></i><span style="font-size:.72rem">Mute Alerts</span></button>
+            <button class="btn btn-outline btn-sm" style="flex-direction:column;padding:.85rem .5rem;height:auto" onclick="goPage('contacts')"><i class="fas fa-cog" style="font-size:1.2rem;margin-bottom:.25rem;color:var(--success)"></i><span style="font-size:.72rem">Settings</span></button>
+          </div>
+          <!-- Voice Recorder -->
+          <hr>
+          <div class="section-hdr">
+            <div class="section-hdr-icon" style="background:rgba(255,60,110,0.1);color:var(--accent)"><i class="fas fa-microphone"></i></div>
+            <div><h3>Voice Recorder</h3><p>Record emergency message</p></div>
+          </div>
+          <div class="recorder-wrap">
+            <div class="recorder-controls">
+              <button class="rec-btn rec-start" id="rec-btn-main" onclick="toggleRecording('main')"><i class="fas fa-microphone"></i></button>
+              <div class="waveform" id="waveform-main">
+                <div class="wave-bar" style="height:8px"></div>
+                <div class="wave-bar" style="height:16px"></div>
+                <div class="wave-bar" style="height:10px"></div>
+                <div class="wave-bar" style="height:22px"></div>
+                <div class="wave-bar" style="height:8px"></div>
+                <div class="wave-bar" style="height:18px"></div>
+                <div class="wave-bar" style="height:12px"></div>
+                <div class="wave-bar" style="height:20px"></div>
+                <div class="wave-bar" style="height:6px"></div>
+                <div class="wave-bar" style="height:14px"></div>
+                <div class="wave-bar" style="height:22px"></div>
+                <div class="wave-bar" style="height:10px"></div>
+              </div>
+              <span id="rec-status" style="font-size:.78rem;color:var(--muted)">Tap to record</span>
+            </div>
+            <audio id="playback-main" controls style="display:none;width:100%;margin-top:.5rem"></audio>
+          </div>
+        </div>
+      </div>
+      <!-- History Preview -->
+      <div class="card">
+        <div class="flex items-center justify-between mb-2">
+          <div class="section-hdr" style="margin-bottom:0">
+            <div class="section-hdr-icon"><i class="fas fa-clock"></i></div>
+            <div><h3>Recent Emergency History</h3></div>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="goPage('emergency-history')">View All <i class="fas fa-chevron-right"></i></button>
+        </div>
+        <div class="space-y-sm" id="dash-history"></div>
+      </div>
+      <footer>Created &amp; Developed by <strong>Mukul Kumar</strong> &nbsp;|&nbsp; SafeHer Women Safety Platform &copy; 2025</footer>
+    </div>
+
+    <!-- SOS PAGE -->
+    <div class="page" id="page-sos">
+      <div class="sos-screen-inner">
+        <!-- CONFIRM STATE -->
+        <div id="sos-confirm">
+          <div style="margin:0 auto 1.5rem;width:120px;height:120px;border-radius:50%;background:rgba(255,60,110,0.1);display:flex;align-items:center;justify-content:center;font-size:3rem">🚨</div>
+          <h2 style="font-size:1.5rem;margin-bottom:.5rem">Confirm Emergency SOS?</h2>
+          <p style="color:var(--muted);font-size:.88rem;max-width:400px;margin:0 auto 1.5rem">This will immediately alert all nearby volunteers, support teams, and your trusted contacts with your live location.</p>
+          <div class="card" style="text-align:left;max-width:420px;margin:0 auto 1.5rem">
+            <div class="space-y-sm" style="font-size:.85rem">
+              <p>📍 <strong>Location:</strong> <span id="sos-loc">Getting…</span></p>
+              <p>👤 <strong>Contacts:</strong> <span id="sos-contacts-count">3</span> trusted contacts</p>
+              <p>🆘 <strong>Volunteers:</strong> Up to 10 nearby</p>
+            </div>
+          </div>
+          <!-- Recorder on SOS page -->
+          <div class="card" style="max-width:420px;margin:0 auto 1.5rem;text-align:left">
+            <div class="section-hdr" style="margin-bottom:.75rem">
+              <div class="section-hdr-icon" style="background:rgba(255,60,110,0.1);color:var(--accent)"><i class="fas fa-microphone"></i></div>
+              <div><h3>Record Voice Message</h3><p>Describe the emergency instead of typing</p></div>
+            </div>
+            <div class="recorder-wrap">
+              <div class="recorder-controls">
+                <button class="rec-btn rec-start" id="rec-btn-sos" onclick="toggleRecording('sos')"><i class="fas fa-microphone"></i></button>
+                <div class="waveform" id="waveform-sos">
+                  <div class="wave-bar" style="height:8px"></div><div class="wave-bar" style="height:16px"></div><div class="wave-bar" style="height:10px"></div><div class="wave-bar" style="height:22px"></div><div class="wave-bar" style="height:8px"></div><div class="wave-bar" style="height:18px"></div><div class="wave-bar" style="height:12px"></div><div class="wave-bar" style="height:20px"></div><div class="wave-bar" style="height:6px"></div><div class="wave-bar" style="height:14px"></div><div class="wave-bar" style="height:22px"></div><div class="wave-bar" style="height:10px"></div>
+                </div>
+                <span id="rec-status-sos" style="font-size:.78rem;color:var(--muted)">Tap to record</span>
+              </div>
+              <audio id="playback-sos" controls style="display:none;width:100%;margin-top:.5rem"></audio>
+            </div>
+          </div>
+          <div style="display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap">
+            <button class="btn btn-ghost btn-lg" onclick="goPage('dashboard')"><i class="fas fa-times"></i> Cancel</button>
+            <button class="btn btn-danger btn-lg" onclick="activateSOS()"><i class="fas fa-exclamation-triangle"></i> Send SOS Now</button>
+          </div>
+        </div>
+
+        <!-- ACTIVE SOS STATE -->
+        <div id="sos-active" style="display:none">
+          <div class="sos-status-badge"><span class="live-dot" style="background:var(--accent)"></span> SOS ACTIVATED</div>
+          <button class="sos-big-btn active-sos" style="margin:0 auto 1.5rem" onclick="showToast('SOS Active! Help is coming.')">
+            🚨<span style="font-size:.8rem">ACTIVE</span>
+          </button>
+          <p style="color:var(--muted);font-size:.88rem;margin-bottom:1.25rem">Help is on the way. Stay calm and stay safe.</p>
+          <div class="card" style="max-width:420px;margin:0 auto 1.25rem;text-align:left">
+            <div class="space-y-sm" style="font-size:.85rem">
+              <p>⏱ Alert active for: <strong id="sos-timer" style="color:var(--accent)">0:00</strong></p>
+              <p>📍 Location: <strong id="sos-active-loc">—</strong></p>
+              <p>👤 Volunteers notified: <strong>4 nearby</strong></p>
+              <p>📞 Contacts alerted: <strong id="sos-active-contacts">3</strong></p>
+            </div>
+          </div>
+          <div id="sos-vol-list" class="space-y-sm" style="max-width:420px;margin:0 auto 1.25rem;text-align:left"></div>
+          <button class="btn btn-danger btn-lg" onclick="cancelSOS()"><i class="fas fa-times-circle"></i> Cancel Alert (Safe Now)</button>
+        </div>
+      </div>
+      <footer>Created &amp; Developed by <strong>Mukul Kumar</strong> &nbsp;|&nbsp; SafeHer Women Safety Platform &copy; 2025</footer>
+    </div>
+
+    <!-- CONTACTS PAGE -->
+    <div class="page" id="page-contacts">
+      <div class="section-hdr mb-3"><div class="section-hdr-icon"><i class="fas fa-phone"></i></div><div><h3>Emergency Contacts</h3><p>Manage your trusted contacts</p></div></div>
+      <div class="card mb-3">
+        <div id="contacts-list" class="space-y-sm"></div>
+      </div>
+      <div class="card mb-3">
+        <h4 style="font-size:.9rem;font-weight:700;margin-bottom:1rem">Add New Contact</h4>
+        <div class="grid-4 gap-2">
+          <div class="field"><label>Name</label><input type="text" id="nc-name" placeholder="Contact name" /></div>
+          <div class="field"><label>Phone</label><input type="tel" id="nc-phone" placeholder="+91 98765 43210" /></div>
+          <div class="field"><label>Relation</label><input type="text" id="nc-rel" placeholder="e.g. Mother" /></div>
+          <div style="display:flex;align-items:flex-end">
+            <button class="btn btn-primary btn-block" onclick="addContact()"><i class="fas fa-plus"></i> Add</button>
+          </div>
+        </div>
+      </div>
+      <footer>Created &amp; Developed by <strong>Mukul Kumar</strong> &nbsp;|&nbsp; SafeHer Women Safety Platform &copy; 2025</footer>
+    </div>
+
+    <!-- SAFE ZONES PAGE -->
+    <div class="page" id="page-safe-zones">
+      <div class="section-hdr mb-3"><div class="section-hdr-icon"><i class="fas fa-map-marker-alt"></i></div><div><h3>Nearby Safe Zones</h3><p>Trusted locations near you</p></div></div>
+      <div class="grid-2" id="safe-zones-list"></div>
+      <footer>Created &amp; Developed by <strong>Mukul Kumar</strong> &nbsp;|&nbsp; SafeHer Women Safety Platform &copy; 2025</footer>
+    </div>
+
+    <!-- EMERGENCY HISTORY -->
+    <div class="page" id="page-emergency-history">
+      <div class="section-hdr mb-3"><div class="section-hdr-icon"><i class="fas fa-clock"></i></div><div><h3>Emergency Alert History</h3><p>All your past emergency requests</p></div></div>
+      <div class="space-y" id="history-list"></div>
+      <footer>Created &amp; Developed by <strong>Mukul Kumar</strong> &nbsp;|&nbsp; SafeHer Women Safety Platform &copy; 2025</footer>
+    </div>
+
+    <!-- VOLUNTEER ALERTS -->
+    <div class="page" id="page-volunteer-alerts">
+      <div class="section-hdr mb-3"><div class="section-hdr-icon"><i class="fas fa-bell"></i></div><div><h3>Active Emergency Alerts</h3><p>Nearby users requesting immediate help</p></div></div>
+      <div class="space-y mb-3" id="vol-alerts-list"></div>
+      <div class="section-hdr mb-2"><div class="section-hdr-icon"><i class="fas fa-users"></i></div><div><h3>Available Volunteers</h3><p>Responders in your network</p></div></div>
+      <div class="grid-2" id="vol-grid"></div>
+      <footer>Created &amp; Developed by <strong>Mukul Kumar</strong> &nbsp;|&nbsp; SafeHer Women Safety Platform &copy; 2025</footer>
+    </div>
+
+    <!-- VOLUNTEER DASHBOARD -->
+    <div class="page" id="page-volunteer-dashboard">
+      <div class="grid-3 mb-3" id="vol-stats"></div>
+      <div class="card mb-3">
+        <h4 style="font-size:.9rem;font-weight:700;margin-bottom:.75rem">My Status</h4>
+        <div class="flex items-center gap-2 flex-wrap">
+          <span id="vol-status-dot" class="live-dot" style="background:var(--success)"></span>
+          <span id="vol-status-txt" style="font-size:.88rem;font-weight:500">Online</span>
+          <div style="margin-left:auto;display:flex;gap:.5rem;flex-wrap:wrap">
+            <button class="btn btn-primary btn-sm" onclick="setVolStatus('online')">Online</button>
+            <button class="btn btn-ghost btn-sm" onclick="setVolStatus('busy')">Busy</button>
+            <button class="btn btn-ghost btn-sm" onclick="setVolStatus('offline')">Offline</button>
+          </div>
+        </div>
+      </div>
+      <div class="section-hdr mb-2"><div class="section-hdr-icon"><i class="fas fa-map-marker-alt"></i></div><div><h3>My Location</h3><p>Currently serving area</p></div></div>
+      <div class="card mb-3">
+        <div style="display:flex;align-items:center;gap:.65rem;background:var(--surface2);border-radius:9px;padding:.65rem .85rem">
+          <i class="fas fa-location-arrow" style="color:var(--accent2)"></i>
+          <span id="vol-loc" style="font-size:.85rem;font-weight:500">Getting location…</span>
+          <span class="badge badge-green ml-auto"><span class="live-dot"></span>Live</span>
+        </div>
+      </div>
+      <footer>Created &amp; Developed by <strong>Mukul Kumar</strong> &nbsp;|&nbsp; SafeHer Women Safety Platform &copy; 2025</footer>
+    </div>
+
+    <!-- VOLUNTEER ACCEPTED -->
+    <div class="page" id="page-volunteer-accepted">
+      <div id="vol-accepted-inner">
+        <div class="card mb-3" style="background:linear-gradient(135deg,rgba(16,212,142,0.08),rgba(5,150,105,0.08));border-color:rgba(16,212,142,0.2)">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="stat-icon" style="background:rgba(16,212,142,0.12);color:var(--success);width:44px;height:44px;border-radius:12px"><i class="fas fa-check-circle"></i></div>
+            <div><h3>Alert Accepted</h3><p style="color:var(--muted);font-size:.78rem">You're now responding to this emergency</p></div>
+          </div>
+          <div class="grid-3">
+            <div><p style="color:var(--muted);font-size:.72rem">User</p><p style="font-size:.88rem;font-weight:600" id="accepted-user">Anonymous User</p></div>
+            <div><p style="color:var(--muted);font-size:.72rem">Location</p><p style="font-size:.88rem;font-weight:600" id="accepted-loc">—</p></div>
+            <div><p style="color:var(--muted);font-size:.72rem">Status</p><span class="badge badge-green">Responding</span></div>
+          </div>
+        </div>
+        <div class="card mb-3">
+          <div class="section-hdr mb-2"><div class="section-hdr-icon"><i class="fas fa-route"></i></div><div><h3>Navigate to Location</h3><p>Get directions to the emergency</p></div></div>
+          <div style="background:var(--surface2);border-radius:10px;padding:.85rem;margin-bottom:.75rem;font-size:.85rem" id="accepted-route">
+            <p><strong>From:</strong> <span id="acc-from">Your location</span></p>
+            <p style="margin-top:.4rem"><strong>To:</strong> <span id="acc-to">Emergency location</span></p>
+          </div>
+          <div class="map-container mb-2" style="height:180px">
+            <div style="height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:.5rem;color:var(--muted)">
+              <i class="fas fa-globe" style="font-size:2.5rem;opacity:.3"></i>
+              <p style="font-size:.78rem">Route Preview</p>
+              <p style="font-size:.7rem">Estimated arrival: ~8 min</p>
+            </div>
+          </div>
+          <div class="flex gap-2 flex-wrap">
+            <button class="btn btn-primary flex-1" onclick="openAcceptedMaps()"><i class="fas fa-map-marked-alt"></i> Open Google Maps</button>
+            <button class="btn btn-outline" onclick="goPage('volunteer-dashboard')"><i class="fas fa-home"></i> Back</button>
+          </div>
+        </div>
+      </div>
+      <div id="vol-no-accepted" style="display:none">
+        <div class="card" style="text-align:center;padding:2.5rem">
+          <i class="fas fa-check-circle" style="font-size:2.5rem;color:var(--success);margin-bottom:.75rem"></i>
+          <h3 style="margin-bottom:.5rem">No Active Accepted Alert</h3>
+          <p style="color:var(--muted);font-size:.85rem;margin-bottom:1rem">You haven't accepted any emergency alert yet.</p>
+          <button class="btn btn-primary" onclick="goPage('volunteer-alerts')">View Active Alerts</button>
+        </div>
+      </div>
+      <footer>Created &amp; Developed by <strong>Mukul Kumar</strong> &nbsp;|&nbsp; SafeHer Women Safety Platform &copy; 2025</footer>
+    </div>
+
+    <!-- ADMIN DASHBOARD -->
+    <div class="page" id="page-admin-dashboard">
+      <div class="section-hdr mb-3"><div class="section-hdr-icon"><i class="fas fa-chart-bar"></i></div><div><h3>Admin Dashboard</h3><p>Platform overview and management</p></div></div>
+      <div class="grid-3 mb-3">
+        <div class="stat-card"><div class="stat-icon" style="background:rgba(6,182,212,0.12);color:var(--accent3)"><i class="fas fa-users"></i></div><div><div class="stat-val">12,453</div><div class="stat-lbl">Total Users</div></div></div>
+        <div class="stat-card"><div class="stat-icon" style="background:rgba(168,85,247,0.12);color:var(--accent2)"><i class="fas fa-user-shield"></i></div><div><div class="stat-val">1,247</div><div class="stat-lbl">Volunteers</div></div></div>
+        <div class="stat-card"><div class="stat-icon" style="background:rgba(255,60,110,0.12);color:var(--accent)"><i class="fas fa-exclamation-triangle"></i></div><div><div class="stat-val">2</div><div class="stat-lbl">Active Alerts</div></div></div>
+        <div class="stat-card"><div class="stat-icon" style="background:rgba(16,212,142,0.12);color:var(--success)"><i class="fas fa-check-circle"></i></div><div><div class="stat-val">18</div><div class="stat-lbl">Resolved Today</div></div></div>
+        <div class="stat-card"><div class="stat-icon" style="background:rgba(245,158,11,0.12);color:var(--warning)"><i class="fas fa-clock"></i></div><div><div class="stat-val">4.2m</div><div class="stat-lbl">Avg Response</div></div></div>
+        <div class="stat-card"><div class="stat-icon" style="background:rgba(255,60,110,0.12);color:var(--accent)"><i class="fas fa-heart"></i></div><div><div class="stat-val">94%</div><div class="stat-lbl">Satisfaction</div></div></div>
+      </div>
+      <div class="grid-2 mb-3">
+        <div class="card">
+          <h4 style="font-size:.9rem;font-weight:700;margin-bottom:1rem">Registrations (Last 7 Days)</h4>
+          <div id="admin-bar-chart"></div>
+        </div>
+        <div class="card">
+          <h4 style="font-size:.9rem;font-weight:700;margin-bottom:1rem">Response Time Avg</h4>
+          <div class="donut-wrap">
+            <svg viewBox="0 0 100 100" width="120" height="120" style="transform:rotate(-90deg)">
+              <circle cx="50" cy="50" r="40" fill="none" stroke="#1a1a35" stroke-width="14"/>
+              <circle cx="50" cy="50" r="40" fill="none" stroke="url(#gd)" stroke-width="14"
+                stroke-dasharray="205 251" stroke-linecap="round"/>
+              <defs><linearGradient id="gd" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#a855f7"/><stop offset="100%" stop-color="#4f46e5"/>
+              </linearGradient></defs>
+            </svg>
+            <div style="position:absolute;text-align:center">
+              <div style="font-size:1.4rem;font-weight:800;color:var(--accent2)">4.2</div>
+              <div style="font-size:.7rem;color:var(--muted)">min avg</div>
+            </div>
+          </div>
+          <p style="font-size:.72rem;text-align:center;color:var(--muted)">Target: &lt; 5 minutes</p>
+        </div>
+      </div>
+      <div class="card mb-3">
+        <h4 style="font-size:.9rem;font-weight:700;margin-bottom:.75rem">Active Emergency Alerts</h4>
+        <div class="space-y-sm" id="admin-active-alerts"></div>
+      </div>
+      <footer>Created &amp; Developed by <strong>Mukul Kumar</strong> &nbsp;|&nbsp; SafeHer Women Safety Platform &copy; 2025</footer>
+    </div>
+
+    <!-- ADMIN VERIFICATION -->
+    <div class="page" id="page-admin-verification">
+      <div class="section-hdr mb-3"><div class="section-hdr-icon"><i class="fas fa-user-check"></i></div><div><h3>Volunteer Verification</h3><p>Review and verify volunteer applications</p></div></div>
+      <div id="pending-vol-list" class="space-y"></div>
+      <footer>Created &amp; Developed by <strong>Mukul Kumar</strong> &nbsp;|&nbsp; SafeHer Women Safety Platform &copy; 2025</footer>
+    </div>
+
+    <!-- ADMIN REPORTS -->
+    <div class="page" id="page-admin-reports">
+      <div class="section-hdr mb-3"><div class="section-hdr-icon"><i class="fas fa-file-alt"></i></div><div><h3>Reports &amp; Analytics</h3><p>Incident reports and performance metrics</p></div></div>
+      <div class="grid-2 mb-3">
+        <div class="card">
+          <h4 style="font-size:.9rem;font-weight:700;margin-bottom:1rem">Incidents by Category</h4>
+          <div id="incidents-chart"></div>
+        </div>
+        <div class="card">
+          <h4 style="font-size:.9rem;font-weight:700;margin-bottom:1rem">Response Time Trends</h4>
+          <div id="response-chart"></div>
+        </div>
+      </div>
+      <div class="card mb-3">
+        <h4 style="font-size:.9rem;font-weight:700;margin-bottom:.75rem">Export Reports</h4>
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+          <button class="btn btn-outline btn-sm" onclick="showToast('Incident Report PDF downloading…')"><i class="fas fa-file-pdf"></i> Incident Report (PDF)</button>
+          <button class="btn btn-outline btn-sm" onclick="showToast('Performance Report PDF downloading…')"><i class="fas fa-chart-bar"></i> Performance Report (PDF)</button>
+          <button class="btn btn-outline btn-sm" onclick="showToast('Volunteer Report CSV downloading…')"><i class="fas fa-users"></i> Volunteer Report (CSV)</button>
+        </div>
+      </div>
+      <footer>Created &amp; Developed by <strong>Mukul Kumar</strong> &nbsp;|&nbsp; SafeHer Women Safety Platform &copy; 2025</footer>
+    </div>
+
+  </div><!-- end main-content -->
+</div><!-- end screen-app -->
+
+<!-- TOAST -->
+<div id="toast"><i class="fas fa-check-circle"></i><span id="toast-msg"></span></div>
+
+<!-- FLOATING SOS FAB -->
+<button id="sos-fab" onclick="goPage('sos')" title="SOS Active"><i class="fas fa-exclamation-triangle"></i></button>
+
+</div><!-- end app -->
+
+<script>
+/* ════════════════════════════════════════════════════ STATE */
+let currentRole = 'user';
+let currentPage = 'dashboard';
+let currentUser = { name: 'Jane Doe', email: 'jane@example.com', initials: 'JD' };
+let sosActive = false;
+let sosTimerInterval = null;
+let sosTimerSec = 0;
+let currentLat = null, currentLng = null;
+let locationWatchId = null;
+let acceptedAlert = null;
+let volunteerStatus = 'online';
+
+let contacts = [
+  { id:'c1', name:'Mom', phone:'+91 98765 43210', relation:'Mother' },
+  { id:'c2', name:'Dad', phone:'+91 98765 43211', relation:'Father' },
+  { id:'c3', name:'Best Friend', phone:'+91 98765 43212', relation:'Friend' },
+];
+
+const VOLUNTEERS = [
+  { id:'v1', name:'Priya Sharma', phone:'+91 98765 43210', status:'online', distance:'0.3 km', rating:4.9, verified:true },
+  { id:'v2', name:'Anjali Mehta', phone:'+91 87654 32109', status:'online', distance:'0.7 km', rating:4.8, verified:true },
+  { id:'v3', name:'Neha Patel', phone:'+91 76543 21098', status:'busy', distance:'1.2 km', rating:4.7, verified:true },
+  { id:'v4', name:'Riya Kapoor', phone:'+91 65432 10987', status:'online', distance:'1.5 km', rating:4.6, verified:false },
+];
+
+const SAFE_ZONES = [
+  { id:'sz1', name:'Central Police Station', address:'123 Main Street, Connaught Place', distance:'0.5 km', type:'police', hours:'24 Hours', phone:'100', lat:28.6315, lng:77.2167 },
+  { id:'sz2', name:'City General Hospital', address:'456 Hospital Road', distance:'1.1 km', type:'hospital', hours:'24 Hours', phone:'108', lat:28.635, lng:77.22 },
+  { id:'sz3', name:"Women's Community Center", address:'789 Safety Lane', distance:'0.8 km', type:'community', hours:'9 AM - 9 PM', phone:'+91 11 2345 6789', lat:28.628, lng:77.219 },
+  { id:'sz4', name:'Safe Haven Shelter', address:'321 Shelter Drive', distance:'2.0 km', type:'shelter', hours:'24 Hours', phone:'+91 11 9876 5432', lat:28.64, lng:77.21 },
+];
+
+const ALERT_HISTORY = [
+  { id:'a1', location:'Connaught Place, Delhi', timestamp: new Date(Date.now()-1000*60*60*24*3), status:'resolved', responder:'Priya Sharma', volunteersNotified:5 },
+  { id:'a2', location:'MG Road, Bengaluru', timestamp: new Date(Date.now()-1000*60*60*24*7), status:'resolved', responder:'Anjali Mehta', volunteersNotified:4 },
+  { id:'a3', location:'Bandra West, Mumbai', timestamp: new Date(Date.now()-1000*60*60*24*14), status:'resolved', responder:'Neha Patel', volunteersNotified:6 },
+];
+
+let ACTIVE_ALERTS = [
+  { id:'aa1', userName:'Anonymous User', location:'Sector 18, Noida', lat:28.57, lng:77.32, timestamp: new Date(Date.now()-1000*60*5), status:'active', volunteersNotified:8 },
+  { id:'aa2', userName:'Anonymous User', location:'Koregaon Park, Pune', lat:18.5362, lng:73.8764, timestamp: new Date(Date.now()-1000*60*12), status:'responding', responder:'Riya Kapoor', volunteersNotified:5 },
+];
+
+let PENDING_VOLS = [
+  { id:'pv1', name:'Kavya Reddy', phone:'+91 54321 09876', submitted:'2 days ago', docs:'ID, Address Proof' },
+  { id:'pv2', name:'Deepika Singh', phone:'+91 43210 98765', submitted:'5 days ago', docs:'ID, Address Proof, Background Check' },
+  { id:'pv3', name:'Meera Joshi', phone:'+91 32109 87654', submitted:'1 week ago', docs:'ID, Address Proof' },
+];
+
+let notifications = [
+  { id:'n1', text:'New emergency alert near you in Sector 18', time:'2m ago', read:false, type:'alert' },
+  { id:'n2', text:'Priya Sharma accepted alert #aa1', time:'5m ago', read:false, type:'success' },
+  { id:'n3', text:'Safety training module updated', time:'1h ago', read:false, type:'system' },
+  { id:'n4', text:'Weekly safety newsletter available', time:'1d ago', read:true, type:'system' },
+];
+
+/* ─── RECORDER STATE ─── */
+let recorderState = {};
+// recorderState[key] = { mediaRecorder, chunks, recording:bool, audioUrl }
+
+/* ─── SOS SOUND ─── */
+let sosAudioCtx = null;
+let sosOscillators = [];
+function startSOSSound(){
+  try {
+    sosAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function beep(freq, start, dur){
+      const osc = sosAudioCtx.createOscillator();
+      const gain = sosAudioCtx.createGain();
+      osc.connect(gain); gain.connect(sosAudioCtx.destination);
+      osc.type = 'sine'; osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0, sosAudioCtx.currentTime + start);
+      gain.gain.linearRampToValueAtTime(0.35, sosAudioCtx.currentTime + start + 0.02);
+      gain.gain.setValueAtTime(0.35, sosAudioCtx.currentTime + start + dur - 0.05);
+      gain.gain.linearRampToValueAtTime(0, sosAudioCtx.currentTime + start + dur);
+      osc.start(sosAudioCtx.currentTime + start);
+      osc.stop(sosAudioCtx.currentTime + start + dur);
+      sosOscillators.push(osc);
+    }
+    // SOS pattern: 3 short, 3 long, 3 short
+    const S=[0,.25,.5], L=[.9,1.5,2.1];
+    S.forEach(t=>beep(880,t,.18));
+    L.forEach(t=>beep(660,t,.55));
+    S.forEach((t,i)=>beep(880,2.8+i*.25,.18));
+  } catch(e){ console.warn('Audio ctx error', e); }
+}
+function stopSOSSound(){
+  sosOscillators.forEach(o=>{ try{o.stop();}catch(e){} });
+  sosOscillators=[];
+  if(sosAudioCtx){ try{sosAudioCtx.close();}catch(e){} sosAudioCtx=null; }
+}
+
+/* ════════════════════════════════════════════════════ HELPERS */
+function timeAgo(date){
+  const d=Date.now()-date.getTime(), m=Math.floor(d/60000);
+  if(m<1) return 'Just now'; if(m<60) return m+'m ago';
+  const h=Math.floor(m/60); if(h<24) return h+'h ago';
+  return Math.floor(h/24)+'d ago';
+}
+function initials(name){ return name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2); }
+function showToast(msg){ const t=document.getElementById('toast'); document.getElementById('toast-msg').textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2500); }
+
+/* ════════════════════════════════════════════════════ LOCATION */
+function startLocationWatch(){
+  if(!navigator.geolocation){ updateLocDisplay('Location not supported'); return; }
+  locationWatchId = navigator.geolocation.watchPosition(
+    pos=>{
+      currentLat = pos.coords.latitude;
+      currentLng = pos.coords.longitude;
+      reverseGeocode(currentLat, currentLng);
+      updateMapIframe(currentLat, currentLng);
+    },
+    err=>{ updateLocDisplay('Location unavailable'); },
+    { enableHighAccuracy:true, maximumAge:10000, timeout:15000 }
+  );
+}
+function reverseGeocode(lat, lng){
+  fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+    .then(r=>r.json())
+    .then(d=>{
+      const addr = d.display_name ? d.display_name.split(',').slice(0,3).join(', ') : `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+      updateLocDisplay(addr);
+    })
+    .catch(()=>{ updateLocDisplay(`${lat.toFixed(4)}, ${lng.toFixed(4)}`); });
+}
+function updateLocDisplay(addr){
+  ['loc-display','vol-loc'].forEach(id=>{ const el=document.getElementById(id); if(el) el.textContent=addr; });
+  const sd=document.getElementById('sos-loc'); if(sd) sd.textContent=addr;
+  const sal=document.getElementById('sos-active-loc'); if(sal) sal.textContent=addr;
+  const af=document.getElementById('acc-from'); if(af) af.textContent=addr;
+}
+function updateMapIframe(lat, lng){
+  const iframe=document.getElementById('map-iframe');
+  if(iframe) iframe.src=`https://www.openstreetmap.org/export/embed.html?bbox=${lng-0.01}%2C${lat-0.01}%2C${lng+0.01}%2C${lat+0.01}&layer=mapnik&marker=${lat}%2C${lng}`;
+}
+function shareLocation(){
+  if(currentLat && currentLng){
+    const url=`https://www.google.com/maps?q=${currentLat},${currentLng}`;
+    navigator.clipboard && navigator.clipboard.writeText(url).then(()=>showToast('Location link copied!')).catch(()=>showToast('Location shared with contacts!'));
+  } else { showToast('Location shared with emergency contacts!'); }
+}
+
+/* ════════════════════════════════════════════════════ RECORDER */
+function toggleRecording(key){
+  if(!recorderState[key]) recorderState[key]={recording:false, chunks:[], audioUrl:null, mediaRecorder:null};
+  const state = recorderState[key];
+  if(!state.recording){ startRecording(key); } else { stopRecording(key); }
+}
+function startRecording(key){
+  navigator.mediaDevices.getUserMedia({audio:true})
+    .then(stream=>{
+      const mr = new MediaRecorder(stream);
+      recorderState[key].mediaRecorder = mr;
+      recorderState[key].chunks = [];
+      recorderState[key].recording = true;
+      mr.ondataavailable = e=>recorderState[key].chunks.push(e.data);
+      mr.onstop = ()=>{
+        stream.getTracks().forEach(t=>t.stop());
+        const blob = new Blob(recorderState[key].chunks,{type:'audio/webm'});
+        const url = URL.createObjectURL(blob);
+        recorderState[key].audioUrl = url;
+        const pb = document.getElementById('playback-'+key);
+        if(pb){ pb.src=url; pb.style.display='block'; }
+        animateWave(key,false);
+        const btn=document.getElementById('rec-btn-'+key);
+        if(btn){ btn.className='rec-btn rec-start'; btn.innerHTML='<i class="fas fa-microphone"></i>'; }
+        const st=document.getElementById('rec-status'+(key==='main'?'':'-'+key));
+        if(st) st.textContent='Recording saved ✓';
+        showToast('Voice message recorded!');
+      };
+      mr.start();
+      animateWave(key,true);
+      const btn=document.getElementById('rec-btn-'+key);
+      if(btn){ btn.className='rec-btn recording'; btn.innerHTML='<i class="fas fa-stop"></i>'; }
+      const st=document.getElementById('rec-status'+(key==='main'?'':'-'+key));
+      if(st) st.textContent='Recording… tap to stop';
+    })
+    .catch(err=>{
+      showToast('Microphone access denied');
+      console.warn('Mic error',err);
+    });
+}
+function stopRecording(key){
+  const state=recorderState[key];
+  if(state && state.mediaRecorder && state.recording){
+    state.recording=false;
+    state.mediaRecorder.stop();
+  }
+}
+let waveIntervals = {};
+function animateWave(key, active){
+  const wf = document.getElementById('waveform-'+key);
+  if(!wf) return;
+  const bars = wf.querySelectorAll('.wave-bar');
+  if(waveIntervals[key]) clearInterval(waveIntervals[key]);
+  if(active){
+    waveIntervals[key] = setInterval(()=>{
+      bars.forEach(b=>{ b.style.height = (4+Math.random()*28)+'px'; });
+    },80);
+  } else {
+    bars.forEach((b,i)=>{ b.style.height=(8+(i%3)*6)+'px'; });
+  }
+}
+
+/* ════════════════════════════════════════════════════ AUTH */
+function switchTab(tab){
+  document.getElementById('tab-login').classList.toggle('active', tab==='login');
+  document.getElementById('tab-register').classList.toggle('active', tab==='register');
+  document.getElementById('form-login').style.display = tab==='login'?'block':'none';
+  document.getElementById('form-register').style.display = tab==='register'?'block':'none';
+}
+function doLogin(){
+  const email=document.getElementById('l-email').value.trim();
+  const pass=document.getElementById('l-pass').value.trim();
+  if(!email||!pass){ showToast('Please fill email and password'); return; }
+  currentRole=document.getElementById('l-role').value;
+  currentUser={name:'Jane Doe', email, initials:'JD'};
+  enterApp();
+}
+function doRegister(){
+  const name=document.getElementById('r-name').value.trim();
+  const email=document.getElementById('r-email').value.trim();
+  const pass=document.getElementById('r-pass').value.trim();
+  if(!name||!email||!pass){ showToast('Please fill all required fields'); return; }
+  currentRole=document.getElementById('r-role').value;
+  currentUser={name, email, initials:initials(name)};
+  enterApp();
+}
+function enterApp(){
+  document.getElementById('screen-login').style.display='none';
+  document.getElementById('screen-app').style.display='block';
+  // Set user info
+  ['sb-avatar','profile-btn'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=currentUser.initials;});
+  document.getElementById('sb-name').textContent=currentUser.name;
+  document.getElementById('sb-role-lbl').textContent=capitalize(currentRole);
+  document.getElementById('pd-name').textContent=currentUser.name;
+  document.getElementById('pd-role').textContent=capitalize(currentRole);
+  buildNav();
+  renderAllContent();
+  startLocationWatch();
+  const defaultPage = currentRole==='volunteer'?'volunteer-dashboard':currentRole==='admin'?'admin-dashboard':'dashboard';
+  goPage(defaultPage);
+}
+function doLogout(){
+  if(sosActive) cancelSOS();
+  document.getElementById('screen-app').style.display='none';
+  document.getElementById('screen-login').style.display='flex';
+  if(locationWatchId) navigator.geolocation.clearWatch(locationWatchId);
+  closeAllDropdowns();
+}
+function capitalize(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+
+/* ════════════════════════════════════════════════════ NAV */
+const NAV_ITEMS = [
+  {page:'dashboard', label:'Dashboard', icon:'fa-home', roles:['user']},
+  {page:'contacts', label:'Emergency Contacts', icon:'fa-phone', roles:['user']},
+  {page:'safe-zones', label:'Safe Zones', icon:'fa-map-marker-alt', roles:['user','volunteer']},
+  {page:'emergency-history', label:'Alert History', icon:'fa-clock', roles:['user','volunteer','admin']},
+  {page:'volunteer-alerts', label:'Emergency Alerts', icon:'fa-bell', roles:['volunteer']},
+  {page:'volunteer-dashboard', label:'My Dashboard', icon:'fa-chart-line', roles:['volunteer']},
+  {page:'volunteer-accepted', label:'Accepted Alert', icon:'fa-route', roles:['volunteer']},
+  {page:'admin-dashboard', label:'Dashboard', icon:'fa-chart-bar', roles:['admin']},
+  {page:'admin-verification', label:'Verify Volunteers', icon:'fa-user-check', roles:['admin']},
+  {page:'admin-reports', label:'Reports', icon:'fa-file-alt', roles:['admin']},
+];
+
+function buildNav(){
+  const nav=document.getElementById('sidebar-nav');
+  nav.innerHTML='';
+  NAV_ITEMS.filter(n=>n.roles.includes(currentRole)).forEach(n=>{
+    const btn=document.createElement('button');
+    btn.className='nav-item'; btn.dataset.page=n.page;
+    btn.innerHTML=`<i class="fas ${n.icon}"></i><span class="nav-label">${n.label}</span>`;
+    btn.onclick=()=>{ goPage(n.page); closeSidebar(); };
+    nav.appendChild(btn);
+  });
+}
+
+function goPage(pg){
+  currentPage=pg;
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const el=document.getElementById('page-'+pg);
+  if(el) el.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.page===pg));
+  // Set page titles
+  const titles={
+    'dashboard':['Dashboard','Welcome back, '+currentUser.name.split(' ')[0]],
+    'sos':['Emergency SOS','Send alert with location'],
+    'contacts':['Emergency Contacts','Manage trusted contacts'],
+    'safe-zones':['Safe Zones','Nearby help locations'],
+    'emergency-history':['Alert History','Your past emergencies'],
+    'volunteer-alerts':['Emergency Alerts','Nearby users need help'],
+    'volunteer-dashboard':['My Dashboard','Volunteer overview'],
+    'volunteer-accepted':['Accepted Alert','Responding to emergency'],
+    'admin-dashboard':['Admin Dashboard','Platform overview'],
+    'admin-verification':['Volunteer Verification','Review applications'],
+    'admin-reports':['Reports & Analytics','Analyze platform data'],
+  };
+  const t=titles[pg]||['SafeHer',''];
+  document.getElementById('page-title').textContent=t[0];
+  document.getElementById('page-subtitle').textContent=t[1];
+  // SOS page init
+  if(pg==='sos'){
+    document.getElementById('sos-confirm').style.display = sosActive?'none':'block';
+    document.getElementById('sos-active').style.display = sosActive?'block':'none';
+    const sc=document.getElementById('sos-contacts-count'); if(sc) sc.textContent=contacts.length;
+  }
+  // Volunteer accepted
+  if(pg==='volunteer-accepted'){
+    const hasAccepted = acceptedAlert !== null;
+    document.getElementById('vol-accepted-inner').style.display = hasAccepted?'block':'none';
+    document.getElementById('vol-no-accepted').style.display = hasAccepted?'none':'block';
+    if(hasAccepted){
+      const el1=document.getElementById('accepted-user'); if(el1) el1.textContent=acceptedAlert.userName;
+      const el2=document.getElementById('accepted-loc'); if(el2) el2.textContent=acceptedAlert.location;
+      const el3=document.getElementById('acc-to'); if(el3) el3.textContent=acceptedAlert.location;
+    }
+  }
+  closeAllDropdowns();
+}
+
+/* ════════════════════════════════════════════════════ SIDEBAR */
+function openSidebar(){ document.getElementById('sidebar').classList.add('open'); document.getElementById('sb-overlay').classList.add('visible'); }
+function closeSidebar(){ document.getElementById('sidebar').classList.remove('open'); document.getElementById('sb-overlay').classList.remove('visible'); }
+
+/* ════════════════════════════════════════════════════ DROPDOWNS */
+function toggleNotif(){
+  document.getElementById('notif-drawer').classList.toggle('open');
+  document.getElementById('profile-drawer').classList.remove('open');
+  renderNotifications();
+}
+function toggleProfile(){
+  document.getElementById('profile-drawer').classList.toggle('open');
+  document.getElementById('notif-drawer').classList.remove('open');
+}
+function closeAllDropdowns(){ document.getElementById('notif-drawer').classList.remove('open'); document.getElementById('profile-drawer').classList.remove('open'); }
+document.addEventListener('click',e=>{
+  if(!e.target.closest('#notif-btn')&&!e.target.closest('#notif-drawer')) document.getElementById('notif-drawer').classList.remove('open');
+  if(!e.target.closest('#profile-btn')&&!e.target.closest('#profile-drawer')) document.getElementById('profile-drawer').classList.remove('open');
+});
+function markAllRead(){
+  notifications.forEach(n=>n.read=true);
+  document.getElementById('notif-dot').style.display='none';
+  renderNotifications();
+  showToast('All notifications marked as read');
+}
+function updateNotifDot(){
+  const unread=notifications.filter(n=>!n.read).length;
+  document.getElementById('notif-dot').style.display=unread>0?'block':'none';
+}
+
+/* ════════════════════════════════════════════════════ SOS */
+function activateSOS(){
+  sosActive=true;
+  sosTimerSec=0;
+  startSOSSound();
+  document.getElementById('sos-confirm').style.display='none';
+  document.getElementById('sos-active').style.display='block';
+  document.getElementById('sos-indicator').style.display='inline-flex';
+  const fab=document.getElementById('sos-fab'); fab.style.display='flex';
+  // start timer
+  sosTimerInterval = setInterval(()=>{
+    sosTimerSec++;
+    const m=Math.floor(sosTimerSec/60), s=sosTimerSec%60;
+    const el=document.getElementById('sos-timer');
+    if(el) el.textContent=m+':'+(s<10?'0':'')+s;
+  },1000);
+  const acel=document.getElementById('sos-active-contacts'); if(acel) acel.textContent=contacts.length;
+  renderSOSVolunteers();
+  showToast('🚨 SOS Alert sent! Help is coming.');
+  // Repeat alarm every 12 seconds
+  if(window._sosRepeat) clearInterval(window._sosRepeat);
+  window._sosRepeat = setInterval(()=>{ if(sosActive) startSOSSound(); },12000);
+}
+function cancelSOS(){
+  sosActive=false;
+  clearInterval(sosTimerInterval);
+  clearInterval(window._sosRepeat);
+  stopSOSSound();
+  document.getElementById('sos-indicator').style.display='none';
+  document.getElementById('sos-fab').style.display='none';
+  document.getElementById('sos-confirm').style.display='block';
+  document.getElementById('sos-active').style.display='none';
+  goPage('dashboard');
+  showToast('SOS cancelled. Stay safe!');
+}
+function renderSOSVolunteers(){
+  const el=document.getElementById('sos-vol-list'); if(!el) return;
+  const online=VOLUNTEERS.filter(v=>v.status==='online');
+  el.innerHTML=online.map(v=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;background:var(--surface2);border-radius:10px;padding:.65rem .85rem">
+      <div style="display:flex;align-items:center;gap:.6rem">
+        <span class="live-dot" style="background:var(--success)"></span>
+        <span style="font-size:.85rem;font-weight:500">${v.name}</span>
+        <span class="badge badge-green">Responding</span>
+      </div>
+      <span style="font-size:.75rem;color:var(--muted)">${v.distance}</span>
+    </div>
+  `).join('');
+}
+
+/* ════════════════════════════════════════════════════ CONTACTS */
+function renderContacts(){
+  const list=document.getElementById('contacts-list'); if(!list) return;
+  if(contacts.length===0){ list.innerHTML='<p style="text-align:center;color:var(--muted);font-size:.85rem;padding:1rem">No contacts yet. Add one below.</p>'; return; }
+  list.innerHTML=contacts.map(c=>`
+    <div class="contact-item">
+      <div class="avatar" style="width:40px;height:40px;font-size:.78rem">${initials(c.name)}</div>
+      <div style="flex:1;min-width:0">
+        <p style="font-weight:600;font-size:.88rem">${c.name}</p>
+        <p style="color:var(--muted);font-size:.78rem">${c.phone}</p>
+        <p style="color:var(--muted);font-size:.72rem">${c.relation}</p>
+      </div>
+      <div style="display:flex;gap:.4rem">
+        <button class="icon-btn" onclick="window.open('tel:${c.phone}','_self')" title="Call"><i class="fas fa-phone" style="color:var(--success)"></i></button>
+        <button class="icon-btn" onclick="removeContact('${c.id}')" title="Remove"><i class="fas fa-times-circle" style="color:var(--accent)"></i></button>
+      </div>
+    </div>
+  `).join('');
+  updateContactsCount();
+}
+function addContact(){
+  const n=document.getElementById('nc-name').value.trim();
+  const p=document.getElementById('nc-phone').value.trim();
+  const r=document.getElementById('nc-rel').value.trim();
+  if(!n||!p){ showToast('Name and phone are required'); return; }
+  contacts.push({id:'c'+Date.now(),name:n,phone:p,relation:r||'Contact'});
+  document.getElementById('nc-name').value='';
+  document.getElementById('nc-phone').value='';
+  document.getElementById('nc-rel').value='';
+  renderContacts();
+  showToast('Contact added successfully!');
+}
+function removeContact(id){
+  contacts=contacts.filter(c=>c.id!==id);
+  renderContacts();
+  showToast('Contact removed');
+}
+function updateContactsCount(){
+  const el=document.getElementById('contacts-count'); if(el) el.textContent=contacts.length;
+  const el2=document.getElementById('sos-contacts-count'); if(el2) el2.textContent=contacts.length;
+}
+
+/* ════════════════════════════════════════════════════ SAFE ZONES */
+function renderSafeZones(){
+  const el=document.getElementById('safe-zones-list'); if(!el) return;
+  const typeIcon={police:'fas fa-shield-alt',hospital:'fas fa-heartbeat',community:'fas fa-users',shelter:'fas fa-home'};
+  const typeColor={police:'rgba(6,182,212,0.12)','police-c':'var(--accent3)',hospital:'rgba(255,60,110,0.12)','hospital-c':'var(--accent)',community:'rgba(16,212,142,0.12)','community-c':'var(--success)',shelter:'rgba(245,158,11,0.12)','shelter-c':'var(--warning)'};
+  el.innerHTML=SAFE_ZONES.map(z=>`
+    <div class="zone-card">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.75rem;margin-bottom:.75rem">
+        <div style="display:flex;align-items:center;gap:.75rem">
+          <div class="zone-icon" style="background:${typeColor[z.type]||'rgba(168,85,247,0.1)'};color:${typeColor[z.type+'-c']||'var(--accent2)'}">
+            <i class="${typeIcon[z.type]||'fa-map-marker-alt'}"></i>
+          </div>
+          <div>
+            <h4 style="font-size:.9rem;font-weight:700">${z.name}</h4>
+            <p style="font-size:.75rem;color:var(--muted)">${z.address}</p>
+          </div>
+        </div>
+        <span class="badge badge-purple">${z.type}</span>
+      </div>
+      <div style="font-size:.8rem;color:var(--muted);display:flex;flex-direction:column;gap:.3rem;margin-bottom:.75rem">
+        <span><i class="fas fa-route" style="color:var(--accent2);margin-right:.3rem"></i>${z.distance}</span>
+        <span><i class="fas fa-clock" style="color:var(--accent2);margin-right:.3rem"></i>${z.hours}</span>
+        <span><i class="fas fa-phone" style="color:var(--accent2);margin-right:.3rem"></i>${z.phone}</span>
+      </div>
+      <div style="display:flex;gap:.5rem">
+        <button class="btn btn-outline btn-sm" style="flex:1" onclick="getDirections(${z.lat},${z.lng},'${z.address}')"><i class="fas fa-directions"></i> Get Directions</button>
+        <button class="btn btn-ghost btn-sm" onclick="window.open('tel:${z.phone}','_self')"><i class="fas fa-phone"></i></button>
+      </div>
+    </div>
+  `).join('');
+}
+function getDirections(lat, lng, addr){
+  const origin = currentLat ? `${currentLat},${currentLng}` : 'Current+Location';
+  window.open(`https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${lat},${lng}&travelmode=driving`,'_blank','noopener,noreferrer');
+  showToast('Opening Google Maps directions…');
+}
+
+/* ════════════════════════════════════════════════════ HISTORY */
+function renderHistory(){
+  const el=document.getElementById('history-list'); if(!el) return;
+  el.innerHTML=ALERT_HISTORY.map(a=>`
+    <div class="card flex items-center gap-3" style="flex-wrap:wrap;justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:.75rem">
+        <div style="width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:${a.status==='resolved'?'rgba(16,212,142,0.12)':'rgba(255,60,110,0.12)'};color:${a.status==='resolved'?'var(--success)':'var(--accent)'}">
+          <i class="fas ${a.status==='resolved'?'fa-check-circle':'fa-exclamation-triangle'}"></i>
+        </div>
+        <div>
+          <p style="font-weight:600;font-size:.88rem">${a.location}</p>
+          <p style="font-size:.75rem;color:var(--muted)">Responder: ${a.responder}</p>
+          <p style="font-size:.72rem;color:var(--muted)">${timeAgo(a.timestamp)} &bull; ${a.volunteersNotified} volunteers notified</p>
+        </div>
+      </div>
+      <span class="badge ${a.status==='resolved'?'badge-green':'badge-red'}">${a.status==='resolved'?'Resolved':'Active'}</span>
+    </div>
+  `).join('');
+}
+function renderDashHistory(){
+  const el=document.getElementById('dash-history'); if(!el) return;
+  el.innerHTML=ALERT_HISTORY.slice(0,2).map(a=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;border:1px solid var(--border);border-radius:10px;padding:.7rem .9rem;background:var(--surface2)">
+      <div style="display:flex;align-items:center;gap:.75rem">
+        <div style="width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:${a.status==='resolved'?'rgba(16,212,142,0.12)':'rgba(255,60,110,0.12)'};color:${a.status==='resolved'?'var(--success)':'var(--accent)'}">
+          <i class="fas ${a.status==='resolved'?'fa-check-circle':'fa-exclamation-triangle'}" style="font-size:.8rem"></i>
+        </div>
+        <div>
+          <p style="font-size:.85rem;font-weight:600">${a.location}</p>
+          <p style="font-size:.72rem;color:var(--muted)">Responder: ${a.responder} &bull; ${timeAgo(a.timestamp)}</p>
+        </div>
+      </div>
+      <span class="badge ${a.status==='resolved'?'badge-green':'badge-red'}" style="font-size:.68rem">${a.status==='resolved'?'Resolved':'Active'}</span>
+    </div>
+  `).join('');
+}
+
+/* ════════════════════════════════════════════════════ VOLUNTEER ALERTS */
+function renderVolAlerts(){
+  const alertsEl=document.getElementById('vol-alerts-list');
+  const volGrid=document.getElementById('vol-grid');
+  if(alertsEl){
+    const active=ACTIVE_ALERTS.filter(a=>a.status==='active');
+    if(active.length===0){
+      alertsEl.innerHTML='<div class="card" style="text-align:center;padding:1.5rem"><i class="fas fa-check-circle" style="color:var(--success);font-size:2rem;margin-bottom:.5rem"></i><p style="color:var(--muted);font-size:.85rem">All alerts have been responded to!</p></div>';
+    } else {
+      alertsEl.innerHTML=active.map(a=>`
+        <div class="alert-card">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:.75rem">
+            <div style="display:flex;align-items:center;gap:.75rem">
+              <div style="width:40px;height:40px;border-radius:10px;background:rgba(255,60,110,0.12);color:var(--accent);display:flex;align-items:center;justify-content:center"><i class="fas fa-exclamation-triangle"></i></div>
+              <div>
+                <p style="font-weight:700;font-size:.9rem">${a.userName}</p>
+                <p style="font-size:.78rem;color:var(--muted)"><i class="fas fa-map-marker-alt" style="margin-right:.25rem"></i>${a.location}</p>
+                <p style="font-size:.72rem;color:var(--muted)">${timeAgo(a.timestamp)}</p>
+              </div>
+            </div>
+            <span class="badge badge-red" style="animation:blink 1.3s ease-in-out infinite">ACTIVE</span>
+          </div>
+          <p style="font-size:.78rem;color:var(--muted);margin-bottom:.75rem"><i class="fas fa-broadcast-tower" style="margin-right:.25rem"></i>${a.volunteersNotified} volunteers notified</p>
+          <div style="display:flex;gap:.5rem">
+            <button class="btn btn-danger btn-sm" style="flex:1" onclick="acceptAlert('${a.id}')"><i class="fas fa-bolt"></i> Accept Alert</button>
+            <button class="btn btn-ghost btn-sm" onclick="declineAlert('${a.id}')">Decline</button>
+          </div>
+        </div>
+      `).join('');
+    }
+  }
+  if(volGrid){
+    volGrid.innerHTML=VOLUNTEERS.map(v=>`
+      <div class="vol-card">
+        <div class="top" style="margin-bottom:.65rem">
+          <div class="avatar" style="width:40px;height:40px;font-size:.78rem">${initials(v.name)}</div>
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:.4rem">
+              <p style="font-weight:600;font-size:.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${v.name}</p>
+              ${v.verified?'<i class="fas fa-check-circle" style="color:#3b82f6;font-size:.75rem"></i>':''}
+            </div>
+            <p style="font-size:.75rem;color:var(--muted)">${v.phone}</p>
+          </div>
+          <span class="badge ${v.status==='online'?'badge-green':v.status==='busy'?'badge-amber':'badge-purple'}">${v.status}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:.78rem;color:var(--muted);margin-bottom:.65rem">
+          <span><i class="fas fa-route"></i> ${v.distance}</span>
+          <span style="color:var(--warning)">★ ${v.rating}</span>
+        </div>
+        <button class="btn btn-primary btn-sm btn-block" ${v.status!=='online'?'disabled':''} onclick="showToast('Contacting ${v.name}...')"><i class="fas fa-bolt"></i> Respond to Alert</button>
+      </div>
+    `).join('');
+  }
+}
+function acceptAlert(id){
+  const a=ACTIVE_ALERTS.find(x=>x.id===id);
+  if(!a) return;
+  a.status='responding'; a.responder='You (Volunteer)';
+  acceptedAlert=a;
+  renderVolAlerts();
+  showToast('Alert accepted! Navigate to the location.');
+  setTimeout(()=>goPage('volunteer-accepted'),600);
+}
+function declineAlert(id){
+  ACTIVE_ALERTS=ACTIVE_ALERTS.filter(x=>x.id!==id);
+  renderVolAlerts();
+  showToast('Alert declined');
+}
+function openAcceptedMaps(){
+  if(!acceptedAlert) return;
+  const origin=currentLat?`${currentLat},${currentLng}`:'Current+Location';
+  const dest=acceptedAlert.lat?`${acceptedAlert.lat},${acceptedAlert.lng}`:encodeURIComponent(acceptedAlert.location);
+  window.open(`https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${dest}&travelmode=driving`,'_blank','noopener,noreferrer');
+}
+
+/* ════════════════════════════════════════════════════ VOLUNTEER DASHBOARD */
+function renderVolDashboard(){
+  const el=document.getElementById('vol-stats'); if(!el) return;
+  const activeCount=ACTIVE_ALERTS.filter(a=>a.status==='active').length;
+  const stats=[
+    {icon:'fa-exclamation-triangle',label:'Active Alerts',value:activeCount,color:'rgba(255,60,110,0.12)','c':'var(--accent)'},
+    {icon:'fa-check-circle',label:'Responded Today',value:7,color:'rgba(16,212,142,0.12)','c':'var(--success)'},
+    {icon:'fa-star',label:'Rating',value:'4.9',color:'rgba(245,158,11,0.12)','c':'var(--warning)'},
+  ];
+  el.innerHTML=stats.map(s=>`
+    <div class="stat-card">
+      <div class="stat-icon" style="background:${s.color};color:${s['c']}"><i class="fas ${s.icon}"></i></div>
+      <div><div class="stat-val">${s.value}</div><div class="stat-lbl">${s.label}</div></div>
+    </div>
+  `).join('');
+}
+function setVolStatus(s){
+  volunteerStatus=s;
+  const dot=document.getElementById('vol-status-dot');
+  const txt=document.getElementById('vol-status-txt');
+  if(dot) dot.style.background=s==='online'?'var(--success)':s==='busy'?'var(--warning)':'var(--muted)';
+  if(txt) txt.textContent=capitalize(s);
+  showToast('Status updated to '+capitalize(s));
+}
+
+/* ════════════════════════════════════════════════════ ADMIN */
+function renderAdminDashboard(){
+  // Bar chart
+  const el=document.getElementById('admin-bar-chart'); if(!el) return;
+  const data=[65,80,55,90,110,75,95];
+  el.innerHTML=data.map((v,i)=>`
+    <div class="bar-row">
+      <span class="bar-label">Day ${i+1}</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${v}%;background:linear-gradient(90deg,#a855f7,#4f46e5)"></div></div>
+      <span class="bar-count">${v}</span>
+    </div>
+  `).join('');
+  // Active alerts
+  const ael=document.getElementById('admin-active-alerts'); if(!ael) return;
+  ael.innerHTML=ACTIVE_ALERTS.map(a=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;border:1px solid rgba(255,60,110,0.15);border-radius:10px;padding:.65rem .85rem;background:rgba(255,60,110,0.04)">
+      <div style="display:flex;align-items:center;gap:.65rem">
+        <i class="fas fa-exclamation-triangle" style="color:var(--accent)"></i>
+        <div>
+          <p style="font-size:.85rem;font-weight:600">${a.userName}</p>
+          <p style="font-size:.72rem;color:var(--muted)">${a.location} &bull; ${timeAgo(a.timestamp)}</p>
+        </div>
+      </div>
+      <div style="display:flex;gap:.4rem">
+        <button class="btn btn-outline btn-sm" onclick="window.open('https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(a.location)}','_blank','noopener,noreferrer')"><i class="fas fa-external-link-alt"></i></button>
+        <button class="btn btn-primary btn-sm" onclick="showToast('Coordinating response…')">Coordinate</button>
+      </div>
+    </div>
+  `).join('');
+}
+function renderAdminVerification(){
+  const el=document.getElementById('pending-vol-list'); if(!el) return;
+  if(PENDING_VOLS.length===0){
+    el.innerHTML='<div class="card" style="text-align:center;padding:2rem"><i class="fas fa-check-circle" style="color:var(--success);font-size:2.5rem;margin-bottom:.5rem"></i><h3>All caught up!</h3><p style="color:var(--muted);font-size:.85rem">No pending verifications.</p></div>';
+    return;
+  }
+  el.innerHTML=PENDING_VOLS.map(pv=>`
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
+        <div style="display:flex;align-items:center;gap:.75rem">
+          <div class="avatar" style="background:linear-gradient(135deg,#f59e0b,#d97706);width:40px;height:40px;font-size:.78rem">${initials(pv.name)}</div>
+          <div><h4 style="font-size:.9rem;font-weight:700">${pv.name}</h4><p style="font-size:.78rem;color:var(--muted)">${pv.phone}</p></div>
+        </div>
+        <span class="badge badge-amber">Pending</span>
+      </div>
+      <div style="font-size:.78rem;color:var(--muted);margin-bottom:.75rem">
+        📅 Submitted: ${pv.submitted} &nbsp;&nbsp; 📎 ${pv.docs}
+      </div>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+        <button class="btn btn-success btn-sm" onclick="approveVol('${pv.id}')"><i class="fas fa-check"></i> Approve</button>
+        <button class="btn btn-danger btn-sm" onclick="rejectVol('${pv.id}')"><i class="fas fa-times"></i> Reject</button>
+        <button class="btn btn-outline btn-sm" onclick="showToast('Profile view would open here')">View Profile</button>
+      </div>
+    </div>
+  `).join('');
+}
+function approveVol(id){ PENDING_VOLS=PENDING_VOLS.filter(x=>x.id!==id); renderAdminVerification(); showToast('Volunteer verified and approved!'); }
+function rejectVol(id){ PENDING_VOLS=PENDING_VOLS.filter(x=>x.id!==id); renderAdminVerification(); showToast('Volunteer application rejected'); }
+
+function renderAdminReports(){
+  const incidents=document.getElementById('incidents-chart');
+  if(incidents){
+    const data=[{label:'Harassment',pct:40,count:156,color:'var(--accent)'},{label:'Theft',pct:25,count:98,color:'var(--warning)'},{label:'Stalking',pct:20,count:78,color:'var(--accent2)'},{label:'Other',pct:15,count:59,color:'var(--accent3)'}];
+    incidents.innerHTML=data.map(d=>`
+      <div style="margin-bottom:.85rem">
+        <div style="display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:.3rem">
+          <span style="font-weight:500">${d.label}</span>
+          <span style="color:var(--muted)">${d.count} incidents</span>
+        </div>
+        <div class="progress"><div class="progress-fill" style="width:${d.pct}%;background:${d.color}"></div></div>
+      </div>
+    `).join('');
+  }
+  const resp=document.getElementById('response-chart');
+  if(resp){
+    const data2=[{day:'Mon',t:4.5},{day:'Tue',t:4.2},{day:'Wed',t:5.1},{day:'Thu',t:3.9},{day:'Fri',t:4.0},{day:'Sat',t:4.8},{day:'Sun',t:3.7}];
+    resp.innerHTML=data2.map(d=>`
+      <div class="bar-row">
+        <span class="bar-label" style="width:28px">${d.day}</span>
+        <div class="bar-track"><div class="bar-fill" style="width:${(d.t/6)*100}%;background:linear-gradient(90deg,var(--success),#059669)"></div></div>
+        <span class="bar-count" style="width:44px;text-align:right">${d.t}m</span>
+      </div>
+    `).join('');
+  }
+}
+
+/* ════════════════════════════════════════════════════ NOTIFICATIONS */
+function renderNotifications(){
+  const el=document.getElementById('notif-list'); if(!el) return;
+  const typeIcon={alert:'fa-exclamation-triangle',success:'fa-check-circle',system:'fa-cog'};
+  const typeBg={alert:'rgba(255,60,110,0.12)',success:'rgba(16,212,142,0.12)',system:'rgba(6,182,212,0.12)'};
+  const typeColor={alert:'var(--accent)',success:'var(--success)',system:'var(--accent3)'};
+  if(notifications.length===0){
+    el.innerHTML='<div style="padding:2rem;text-align:center;color:var(--muted);font-size:.85rem"><i class="fas fa-bell" style="font-size:2rem;margin-bottom:.5rem;display:block"></i>No notifications</div>';
+    return;
+  }
+  el.innerHTML=notifications.map(n=>`
+    <div class="notif-item ${n.read?'':'unread'}" onclick="markNotifRead('${n.id}')">
+      <div class="notif-icon" style="background:${typeBg[n.type]};color:${typeColor[n.type]}"><i class="fas ${typeIcon[n.type]}"></i></div>
+      <div style="flex:1;min-width:0">
+        <p style="font-size:.83rem;${!n.read?'font-weight:600':''}">${n.text}</p>
+        <p style="font-size:.72rem;color:var(--muted);margin-top:.15rem">${n.time}</p>
+      </div>
+      ${!n.read?'<span class="live-dot" style="background:var(--accent2);flex-shrink:0;margin-top:.25rem"></span>':''}
+    </div>
+  `).join('');
+  updateNotifDot();
+}
+function markNotifRead(id){ const n=notifications.find(x=>x.id===id); if(n) n.read=true; renderNotifications(); updateNotifDot(); }
+
+/* ════════════════════════════════════════════════════ INIT */
+function renderAllContent(){
+  renderContacts();
+  renderSafeZones();
+  renderHistory();
+  renderDashHistory();
+  renderVolAlerts();
+  renderVolDashboard();
+  renderAdminDashboard();
+  renderAdminVerification();
+  renderAdminReports();
+  renderNotifications();
+}
+</script>
+</body>
+</html>
